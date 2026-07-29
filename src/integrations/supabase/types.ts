@@ -342,6 +342,15 @@ export type Database = {
         }
         Returns: Json
       }
+      find_recipient: {
+        Args: { _query: string }
+        Returns: {
+          account_number: string
+          full_name: string
+          id: string
+          username: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

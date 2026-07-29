@@ -48,7 +48,7 @@ function footer(doc: jsPDF) {
   doc.setFontSize(8);
   doc.setTextColor(...GREY);
   doc.text(
-    "Heritage Bank · 1885 Heritage Plaza, New York, NY 10005 · support@heritagebank.com · +1 (800) 555-1885",
+    "Heritage Bank · 8001 South Orange Blossom Trail, Orlando, FL 32809 · seulgimariee411@gmail.com · +1 (646) 439-3823",
     105,
     281,
     { align: "center" },

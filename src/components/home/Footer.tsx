@@ -15,6 +15,23 @@ export function Footer() {
           <div>
             <div className="text-xl font-bold text-foreground">Heritage Bank</div>
             <p className="mt-4 text-sm text-muted-foreground">Banking Excellence Since 1885</p>
+            <address className="mt-5 space-y-2 text-sm text-muted-foreground not-italic">
+              <div>8001 South Orange Blossom Trail, Orlando, FL 32809</div>
+              <a
+                href="mailto:seulgimariee411@gmail.com"
+                className="block transition-colors hover:text-primary"
+              >
+                seulgimariee411@gmail.com
+              </a>
+              <a
+                href="https://wa.me/16464393823"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block transition-colors hover:text-primary"
+              >
+                WhatsApp: +1 (646) 439-3823
+              </a>
+            </address>
           </div>
           {COLUMNS.map((column) => (
             <div key={column.heading}>

@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { Smartsupp } from "@/components/site/Smartsupp";
+import { SupportFab } from "@/components/site/SupportFab";
 
 
 function NotFoundComponent() {

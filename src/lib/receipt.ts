@@ -35,8 +35,8 @@ function watermark(doc: jsPDF) {
   doc.setGState(new doc.GState({ opacity: 0.07 }));
   doc.setTextColor(...NAVY);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(52);
-  doc.text("HERITAGE BANK", 105, 165, { align: "center", angle: 32 });
+  doc.setFontSize(40);
+  doc.text("HERITAGE BANK", 100, 170, { align: "center", angle: 30 });
   doc.restoreGraphicsState();
 }
 

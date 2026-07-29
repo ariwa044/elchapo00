@@ -45,8 +45,8 @@ export function SendMoney({ profile }: { profile: Profile }) {
       const { error } = await supabase.rpc("send_money", {
         _recipient_account: recipient!.account_number,
         _amount: Number(amount),
-        _description: description || null,
-        _reference: reference || null,
+        _description: description || undefined,
+        _reference: reference || undefined,
       });
       if (error) throw error;
     },

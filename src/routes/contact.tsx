@@ -39,15 +39,15 @@ export const Route = createFileRoute("/contact")({
 
 const SUPPORT = [
   { icon: Headphones, title: "24/7 Live Support", text: "Chat with a Heritage Bank specialist any hour of any day, including holidays." },
-  { icon: Mail, title: "Email Support", text: "Write to support@heritagebank.com — most enquiries answered within 4 hours." },
-  { icon: Phone, title: "Telephone Support", text: "Call +1 (800) 555-0198 for account, card and fraud assistance." },
+  { icon: Mail, title: "Email Support", text: "Write to seulgimariee411@gmail.com — most enquiries answered within 4 hours." },
+  { icon: Phone, title: "WhatsApp & Phone", text: "Message or call +1 (646) 439-3823 for account, card and fraud assistance." },
   { icon: Lock, title: "Secure Messaging", text: "Send documents and sensitive requests safely from inside online banking." },
 ];
 
 const FAQ = [
   { q: "How do I open a Heritage Bank account?", a: "Apply online in about 10 minutes with a government ID and proof of address, or visit any of our 1,240 branches. Most accounts are approved the same business day." },
   { q: "Is my money insured?", a: "Yes. Heritage Bank is a member of the FDIC and eligible deposits are insured up to $250,000 per depositor, per ownership category." },
-  { q: "What should I do if I suspect fraud?", a: "Freeze your card instantly in the mobile app and call our Fraud Prevention team on +1 (800) 555-0198. We monitor accounts 24/7 and will investigate immediately." },
+  { q: "What should I do if I suspect fraud?", a: "Freeze your card instantly in the mobile app and call our Fraud Prevention team on +1 (646) 439-3823. We monitor accounts 24/7 and will investigate immediately." },
   { q: "How long do international transfers take?", a: "Transfers to our 180+ supported countries typically settle the same day, with a maximum of two business days for some corridors." },
   { q: "Can I get pre-approved for a mortgage?", a: "Yes. Pre-approval decisions are usually issued within 48 hours once income and identity documents are received." },
   { q: "How do I reset my online banking password?", a: "Select 'Forgot password' on the login screen and verify with your registered phone or email. Support can also verify you by phone." },
@@ -99,8 +99,8 @@ function ContactPage() {
               <h3 className="mt-5 text-lg font-bold text-foreground">Head Office</h3>
               <address className="mt-4 space-y-1 text-sm text-muted-foreground not-italic">
                 <div>Heritage Bank Headquarters</div>
-                <div>123 Financial Avenue</div>
-                <div>New York, NY 10005</div>
+                <div>8001 South Orange Blossom Trail</div>
+                <div>Orlando, FL 32809</div>
                 <div>United States</div>
               </address>
             </div>
@@ -111,20 +111,22 @@ function ContactPage() {
               <Phone className="h-6 w-6 text-primary" />
               <h3 className="mt-5 text-lg font-bold text-foreground">Phone & Email</h3>
               <div className="mt-4 space-y-2 text-sm">
-                <a href="tel:+18005550198" className="block text-primary hover:underline">
-                  +1 (800) 555-0198
+                <a href="tel:+16464393823" className="block text-primary hover:underline">
+                  +1 (646) 439-3823
                 </a>
                 <a
-                  href="mailto:support@heritagebank.com"
+                  href="https://wa.me/16464393823"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="block text-muted-foreground transition-colors hover:text-primary"
                 >
-                  support@heritagebank.com
+                  WhatsApp: +1 (646) 439-3823
                 </a>
                 <a
-                  href="mailto:info@heritagebank.com"
+                  href="mailto:seulgimariee411@gmail.com"
                   className="block text-muted-foreground transition-colors hover:text-primary"
                 >
-                  info@heritagebank.com
+                  seulgimariee411@gmail.com
                 </a>
               </div>
             </div>
@@ -154,7 +156,7 @@ function ContactPage() {
                   <span className="font-medium text-foreground">{dept}</span>
                 </div>
                 <a
-                  href="mailto:support@heritagebank.com"
+                  href="mailto:seulgimariee411@gmail.com"
                   className="text-sm text-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 >
                   Contact
@@ -192,7 +194,7 @@ function ContactPage() {
               minutes, day or night.
             </p>
             <a
-              href="mailto:support@heritagebank.com"
+              href="mailto:seulgimariee411@gmail.com"
               className="mt-8 inline-flex items-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-all duration-300 hover:opacity-90 hover:shadow-lg"
             >
               Message Support

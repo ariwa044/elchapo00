@@ -36,21 +36,23 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <a
-            href="#"
+          <Link
+            to="/dashboard"
+            activeProps={{ className: "text-primary" }}
             className="text-sm text-foreground/85 transition-colors hover:text-primary"
           >
             Dashboard
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
-          <a
-            href="#"
+          <Link
+            to="/auth"
             className="rounded-md border border-primary px-5 py-2 text-sm font-medium text-primary transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
           >
             Login
-          </a>
+          </Link>
+
           <button
             type="button"
             aria-label="Toggle navigation"

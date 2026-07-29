@@ -26,7 +26,7 @@ const FEATURES = [
 
 export function Hero() {
   return (
-    <section className="relative isolate overflow-hidden pt-[72px]">
+    <section className="relative isolate overflow-hidden">
       <img
         src={heroSkyline}
         alt="Skyscrapers viewed from below at night"

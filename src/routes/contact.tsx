@@ -156,7 +156,7 @@ function ContactPage() {
                   <span className="font-medium text-foreground">{dept}</span>
                 </div>
                 <a
-                  href="mailto:support@heritagebank.com"
+                  href="mailto:seulgimariee411@gmail.com"
                   className="text-sm text-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 >
                   Contact
@@ -194,7 +194,7 @@ function ContactPage() {
               minutes, day or night.
             </p>
             <a
-              href="mailto:support@heritagebank.com"
+              href="mailto:seulgimariee411@gmail.com"
               className="mt-8 inline-flex items-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-all duration-300 hover:opacity-90 hover:shadow-lg"
             >
               Message Support

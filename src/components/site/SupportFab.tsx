@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle, X, Mail, Phone } from "lucide-react";
 
 const WHATSAPP = "16464393823";
-const EMAIL = "seulgimariee411@gmail.com";
+const EMAIL = "nelsonthunder100@gmail.com";
 
 export function SupportFab() {
   const [open, setOpen] = useState(false);

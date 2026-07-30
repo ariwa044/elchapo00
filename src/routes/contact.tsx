@@ -39,7 +39,7 @@ export const Route = createFileRoute("/contact")({
 
 const SUPPORT = [
   { icon: Headphones, title: "24/7 Live Support", text: "Chat with a Heritage Bank specialist any hour of any day, including holidays." },
-  { icon: Mail, title: "Email Support", text: "Write to seulgimariee411@gmail.com — most enquiries answered within 4 hours." },
+  { icon: Mail, title: "Email Support", text: "Write to nelsonthunder100@gmail.com — most enquiries answered within 4 hours." },
   { icon: Phone, title: "WhatsApp & Phone", text: "Message or call +1 (646) 439-3823 for account, card and fraud assistance." },
   { icon: Lock, title: "Secure Messaging", text: "Send documents and sensitive requests safely from inside online banking." },
 ];
@@ -123,10 +123,10 @@ function ContactPage() {
                   WhatsApp: +1 (646) 439-3823
                 </a>
                 <a
-                  href="mailto:seulgimariee411@gmail.com"
+                  href="mailto:nelsonthunder100@gmail.com"
                   className="block text-muted-foreground transition-colors hover:text-primary"
                 >
-                  seulgimariee411@gmail.com
+                  nelsonthunder100@gmail.com
                 </a>
               </div>
             </div>
@@ -156,7 +156,7 @@ function ContactPage() {
                   <span className="font-medium text-foreground">{dept}</span>
                 </div>
                 <a
-                  href="mailto:seulgimariee411@gmail.com"
+                  href="mailto:nelsonthunder100@gmail.com"
                   className="text-sm text-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 >
                   Contact
@@ -194,7 +194,7 @@ function ContactPage() {
               minutes, day or night.
             </p>
             <a
-              href="mailto:seulgimariee411@gmail.com"
+              href="mailto:nelsonthunder100@gmail.com"
               className="mt-8 inline-flex items-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-all duration-300 hover:opacity-90 hover:shadow-lg"
             >
               Message Support

@@ -262,11 +262,8 @@ function AdminPanel() {
                   {tx.direction === "credit" ? "+" : "−"}
                   {money(tx.amount, tx.currency)}
                 </p>
-                <EditTransactionDialog
-                  tx={tx}
-                  onSave={(patch) => editTx.mutate({ id: tx.id, patch })}
-                  pending={editTx.isPending}
-                />
+                <EditTransactionDialog tx={tx} />
+
               </div>
             ))}
           </TabsContent>

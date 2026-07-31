@@ -108,18 +108,6 @@ function AdminPanel() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const editTx = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Transaction> }) => {
-      const { error } = await supabase.from("transactions").update(patch).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Transaction updated");
-      queryClient.invalidateQueries({ queryKey: ["admin-transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
 
   if (isLoading) {
     return <main className="grid min-h-screen place-items-center bg-surface-deep text-muted-foreground">Checking access…</main>;

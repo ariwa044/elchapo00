@@ -334,9 +334,14 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_delete_transaction: { Args: { _tx_id: string }; Returns: undefined }
       admin_review_transaction: {
         Args: { _approve: boolean; _tx_id: string }
         Returns: undefined
+      }
+      admin_update_transaction: {
+        Args: { _patch: Json; _tx_id: string }
+        Returns: Json
       }
       bank_transfer: {
         Args: {

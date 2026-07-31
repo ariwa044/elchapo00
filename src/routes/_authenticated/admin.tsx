@@ -217,6 +217,7 @@ function AdminPanel() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <FundDialog customer={customer} />
                   <EditCustomerDialog customer={customer} />
+                  <CustomerTransactionsDialog customer={customer} transactions={transactions} />
                   {STATUSES.filter((status) => status !== customer.account_status).map((status) => (
                     <Button
                       key={status}

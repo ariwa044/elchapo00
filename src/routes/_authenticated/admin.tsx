@@ -108,18 +108,6 @@ function AdminPanel() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const editTx = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Transaction> }) => {
-      const { error } = await supabase.from("transactions").update(patch).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Transaction updated");
-      queryClient.invalidateQueries({ queryKey: ["admin-transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
 
   if (isLoading) {
     return <main className="grid min-h-screen place-items-center bg-surface-deep text-muted-foreground">Checking access…</main>;
@@ -229,6 +217,7 @@ function AdminPanel() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <FundDialog customer={customer} />
                   <EditCustomerDialog customer={customer} />
+                  <CustomerTransactionsDialog customer={customer} transactions={transactions} />
                   {STATUSES.filter((status) => status !== customer.account_status).map((status) => (
                     <Button
                       key={status}
@@ -262,11 +251,8 @@ function AdminPanel() {
                   {tx.direction === "credit" ? "+" : "−"}
                   {money(tx.amount, tx.currency)}
                 </p>
-                <EditTransactionDialog
-                  tx={tx}
-                  onSave={(patch) => editTx.mutate({ id: tx.id, patch })}
-                  pending={editTx.isPending}
-                />
+                <EditTransactionDialog tx={tx} />
+
               </div>
             ))}
           </TabsContent>
@@ -402,18 +388,82 @@ function EditCustomerDialog({ customer }: { customer: Profile }) {
   );
 }
 
-function EditTransactionDialog({
-  tx,
-  onSave,
-  pending,
-}: {
-  tx: Transaction;
-  onSave: (patch: Partial<Transaction>) => void;
-  pending: boolean;
-}) {
+const TX_FIELDS: { key: string; label: string; type?: string }[] = [
+  { key: "amount", label: "Amount", type: "number" },
+  { key: "fee", label: "Fee", type: "number" },
+  { key: "currency", label: "Currency" },
+  { key: "reference", label: "Transaction ID / Reference" },
+  { key: "description", label: "Description" },
+  { key: "narration", label: "Narration" },
+  { key: "counterparty_name", label: "Recipient / Sender name" },
+  { key: "counterparty_account", label: "Counterparty account" },
+  { key: "counterparty_bank", label: "Counterparty bank" },
+  { key: "counterparty_country", label: "Counterparty country" },
+  { key: "swift_code", label: "SWIFT / BIC" },
+  { key: "iban", label: "IBAN" },
+  { key: "purpose", label: "Purpose" },
+];
+
+function toLocalInput(iso: string) {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function EditTransactionDialog({ tx }: { tx: Transaction }) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [description, setDescription] = useState(tx.description ?? "");
-  const [status, setStatus] = useState(tx.status);
+  const [form, setForm] = useState<Record<string, string>>(() => ({
+    ...Object.fromEntries(TX_FIELDS.map((f) => [f.key, String((tx as never as Record<string, unknown>)[f.key] ?? "")])),
+    direction: tx.direction,
+    category: tx.category,
+    status: tx.status,
+    created_at: toLocalInput(tx.created_at),
+  }));
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-transactions"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
+    queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
+  };
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const patch: Record<string, string | number> = {
+        direction: form.direction,
+        category: form.category,
+        status: form.status,
+        amount: Number(form.amount),
+        fee: Number(form.fee || 0),
+        created_at: new Date(form.created_at).toISOString(),
+      };
+      TX_FIELDS.filter((f) => f.type !== "number").forEach((f) => {
+        patch[f.key] = form[f.key] ?? "";
+      });
+      const { error } = await supabase.rpc("admin_update_transaction", { _tx_id: tx.id, _patch: patch });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Transaction updated");
+      setOpen(false);
+      invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("admin_delete_transaction", { _tx_id: tx.id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Transaction deleted");
+      setOpen(false);
+      invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -422,20 +472,61 @@ function EditTransactionDialog({
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit transaction {tx.reference}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label>Description</Label>
-            <Input value={description} onChange={(event) => setDescription(event.target.value)} />
+            <Label>Date &amp; time</Label>
+            <Input
+              type="datetime-local"
+              value={form.created_at}
+              onChange={(event) => setForm({ ...form, created_at: event.target.value })}
+            />
           </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Direction</Label>
+              <select
+                value={form.direction}
+                onChange={(event) => setForm({ ...form, direction: event.target.value })}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
+              >
+                <option value="credit">Credit (money in)</option>
+                <option value="debit">Debit (money out)</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Category</Label>
+              <select
+                value={form.category}
+                onChange={(event) => setForm({ ...form, category: event.target.value })}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
+              >
+                {Object.keys(CATEGORY_LABELS).map((value) => (
+                  <option key={value} value={value}>
+                    {CATEGORY_LABELS[value]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {TX_FIELDS.map((field) => (
+            <div key={field.key} className="space-y-1.5">
+              <Label>{field.label}</Label>
+              <Input
+                type={field.type ?? "text"}
+                value={form[field.key] ?? ""}
+                onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
+              />
+            </div>
+          ))}
           <div className="space-y-1.5">
             <Label>Status</Label>
             <select
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
+              value={form.status}
+              onChange={(event) => setForm({ ...form, status: event.target.value })}
               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
             >
               {["pending", "completed", "failed", "rejected", "reversed"].map((value) => (
@@ -445,23 +536,82 @@ function EditTransactionDialog({
               ))}
             </select>
             <p className="text-xs text-muted-foreground">
-              Changing to completed applies the amount to the balance; reversing or rejecting a completed
-              transaction refunds it.
+              The customer's balance is recalculated automatically: completed transactions apply their amount,
+              any other status removes it.
             </p>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button
-            disabled={pending}
+            variant="destructive"
+            disabled={remove.isPending}
             onClick={() => {
-              onSave({ description, status });
-              setOpen(false);
+              if (confirm("Delete this transaction permanently?")) remove.mutate();
             }}
           >
-            Save
+            Delete
+          </Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending}>
+            {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
+function CustomerTransactionsDialog({
+  customer,
+  transactions,
+}: {
+  customer: Profile;
+  transactions: Transaction[];
+}) {
+  const [open, setOpen] = useState(false);
+  const rows = transactions.filter((tx) => tx.user_id === customer.id);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="secondary">
+          Transactions ({rows.length})
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{customer.full_name}'s transactions</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2">
+          {rows.length === 0 && (
+            <p className="py-8 text-center text-sm text-muted-foreground">No transactions yet.</p>
+          )}
+          {rows.map((tx) => (
+            <div
+              key={tx.id}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/50 bg-surface-deep p-3"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {tx.description || CATEGORY_LABELS[tx.category] || tx.category}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {tx.reference} · {formatDate(tx.created_at)} {formatTime(tx.created_at)} · {tx.status}
+                </p>
+              </div>
+              <p
+                className={
+                  tx.direction === "credit" ? "font-semibold text-emerald-400" : "font-semibold text-rose-400"
+                }
+              >
+                {tx.direction === "credit" ? "+" : "−"}
+                {money(tx.amount, tx.currency)}
+              </p>
+              <EditTransactionDialog tx={tx} />
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Search, ShieldCheck, X } from "lucide-react";
+import { Check, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -28,21 +27,7 @@ import {
 } from "@/lib/bank";
 import type { Profile, Transaction } from "@/lib/bank";
 
-export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({
-    meta: [
-      { title: "Administrator Panel | Heritage Bank" },
-      {
-        name: "description",
-        content:
-          "Heritage Bank administrator console for approving deposits and withdrawals, funding accounts and managing customers.",
-      },
-      { property: "og:title", content: "Administrator Panel | Heritage Bank" },
-      { property: "og:description", content: "Internal Heritage Bank administration console." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminPanel,
 });
 
@@ -135,30 +120,15 @@ function AdminPanel() {
   );
 
   return (
-    <main className="min-h-screen bg-surface-deep px-4 py-10 sm:px-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="flex items-center gap-2 text-3xl font-extrabold tracking-tight text-foreground">
-              <ShieldCheck className="h-7 w-7 text-primary" /> Administrator Panel
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {profiles.length} customers · {pending.length} pending requests
-            </p>
-          </div>
-          <Button asChild variant="outline">
-            <Link to="/dashboard">Back to dashboard</Link>
-          </Button>
-        </div>
+    <div>
+      <Tabs defaultValue="requests" className="mt-8">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="requests">Pending Requests</TabsTrigger>
+          <TabsTrigger value="customers">Customers</TabsTrigger>
+          <TabsTrigger value="transactions">All Transactions</TabsTrigger>
+        </TabsList>
 
-        <Tabs defaultValue="requests" className="mt-8">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="requests">Pending Requests</TabsTrigger>
-            <TabsTrigger value="customers">Customers</TabsTrigger>
-            <TabsTrigger value="transactions">All Transactions</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="requests" className="mt-6 space-y-3">
+        <TabsContent value="requests" className="mt-6 space-y-3">
             {pending.map((tx) => (
               <div
                 key={tx.id}
@@ -257,8 +227,7 @@ function AdminPanel() {
             ))}
           </TabsContent>
         </Tabs>
-      </div>
-    </main>
+    </div>
   );
 }
 
@@ -300,7 +269,7 @@ function FundDialog({ customer }: { customer: Profile }) {
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label>Direction</Label>
+            <label className="text-sm font-medium">Direction</label>
             <select
               value={direction}
               onChange={(event) => setDirection(event.target.value as "credit" | "debit")}
@@ -311,11 +280,11 @@ function FundDialog({ customer }: { customer: Profile }) {
             </select>
           </div>
           <div className="space-y-1.5">
-            <Label>Amount</Label>
+            <label className="text-sm font-medium">Amount</label>
             <Input type="number" value={amount} onChange={(event) => setAmount(event.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label>Description</Label>
+            <label className="text-sm font-medium">Description</label>
             <Input value={description} onChange={(event) => setDescription(event.target.value)} />
           </div>
         </div>
@@ -373,7 +342,7 @@ function EditCustomerDialog({ customer }: { customer: Profile }) {
         <div className="space-y-3">
           {(Object.keys(form) as (keyof typeof form)[]).map((key) => (
             <div key={key} className="space-y-1.5">
-              <Label className="capitalize">{key.replace(/_/g, " ")}</Label>
+              <label className="text-sm font-medium capitalize">{key.replace(/_/g, " ")}</label>
               <Input value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />
             </div>
           ))}
@@ -478,7 +447,7 @@ function EditTransactionDialog({ tx }: { tx: Transaction }) {
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label>Date &amp; time</Label>
+            <label className="text-sm font-medium">Date &amp; time</label>
             <Input
               type="datetime-local"
               value={form.created_at}
@@ -487,7 +456,7 @@ function EditTransactionDialog({ tx }: { tx: Transaction }) {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label>Direction</Label>
+              <label className="text-sm font-medium">Direction</label>
               <select
                 value={form.direction}
                 onChange={(event) => setForm({ ...form, direction: event.target.value })}
@@ -498,7 +467,7 @@ function EditTransactionDialog({ tx }: { tx: Transaction }) {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Category</Label>
+              <label className="text-sm font-medium">Category</label>
               <select
                 value={form.category}
                 onChange={(event) => setForm({ ...form, category: event.target.value })}
@@ -514,7 +483,7 @@ function EditTransactionDialog({ tx }: { tx: Transaction }) {
           </div>
           {TX_FIELDS.map((field) => (
             <div key={field.key} className="space-y-1.5">
-              <Label>{field.label}</Label>
+              <label className="text-sm font-medium">{field.label}</label>
               <Input
                 type={field.type ?? "text"}
                 value={form[field.key] ?? ""}
@@ -523,7 +492,7 @@ function EditTransactionDialog({ tx }: { tx: Transaction }) {
             </div>
           ))}
           <div className="space-y-1.5">
-            <Label>Status</Label>
+            <label className="text-sm font-medium">Status</label>
             <select
               value={form.status}
               onChange={(event) => setForm({ ...form, status: event.target.value })}
@@ -614,4 +583,3 @@ function CustomerTransactionsDialog({
     </Dialog>
   );
 }
-

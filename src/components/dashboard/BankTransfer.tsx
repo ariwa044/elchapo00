@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { internationalFee, localFee, money } from "@/lib/bank";
 import type { Profile, Transaction } from "@/lib/bank";
 import { downloadReceipt, printReceipt, shareReceipt } from "@/lib/receipt";
+import { OtpVerification } from "@/components/dashboard/OtpVerification";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "NGN", "ZAR", "JPY"];
 
@@ -21,6 +22,12 @@ type Form = Record<string, string>;
 export function BankTransfer({ profile }: { profile: Profile }) {
   const queryClient = useQueryClient();
   const [receipt, setReceipt] = useState<Transaction | null>(null);
+  const [showOtp, setShowOtp] = useState(false);
+  const [pendingTransfer, setPendingTransfer] = useState<{
+    kind: "local" | "international";
+    form: Form;
+    fee: number;
+  } | null>(null);
   const [local, setLocal] = useState<Form>({
     bank_name: "",
     account_number: "",
@@ -50,6 +57,19 @@ export function BankTransfer({ profile }: { profile: Profile }) {
       if (!form.account_name || !form.account_number || !form.bank_name)
         throw new Error("Complete the beneficiary details");
       const fee = kind === "local" ? localFee(amount) : internationalFee(amount);
+
+      // Store pending transfer for OTP verification
+      setPendingTransfer({ kind, form, fee });
+      setShowOtp(true);
+      return null;
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const executeTransfer = useMutation({
+    mutationFn: async () => {
+      const { kind, form, fee } = pendingTransfer!;
+      const amount = Number(form.amount);
 
       const { data, error } = await supabase.rpc("bank_transfer", {
         _amount: amount,
@@ -86,12 +106,18 @@ export function BankTransfer({ profile }: { profile: Profile }) {
     },
     onSuccess: (tx) => {
       setReceipt(tx);
+      setShowOtp(false);
+      setPendingTransfer(null);
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["beneficiaries"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      toast.error(error.message);
+      setShowOtp(false);
+      setPendingTransfer(null);
+    },
   });
 
   if (receipt) {
@@ -126,6 +152,29 @@ export function BankTransfer({ profile }: { profile: Profile }) {
           New transfer
         </Button>
       </div>
+    );
+  }
+
+  if (showOtp && pendingTransfer) {
+    const { kind, form, fee } = pendingTransfer;
+    const amount = Number(form.amount);
+    const currency = kind === "local" ? profile.currency : form.currency;
+    
+    return (
+      <OtpVerification
+        userId={profile.id}
+        userEmail={profile.email || ""}
+        transactionSummary={{
+          recipient: form.account_name,
+          amount: money(amount + fee, currency),
+          description: kind === "local" ? form.narration : form.description,
+        }}
+        onVerified={() => executeTransfer.mutate()}
+        onCancel={() => {
+          setShowOtp(false);
+          setPendingTransfer(null);
+        }}
+      />
     );
   }
 

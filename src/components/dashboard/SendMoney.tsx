@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { money } from "@/lib/bank";
 import type { Profile } from "@/lib/bank";
+import { OtpVerification } from "@/components/dashboard/OtpVerification";
 
 type Recipient = { id: string; full_name: string; username: string | null; account_number: string };
 
@@ -22,7 +23,7 @@ export function SendMoney({ profile }: { profile: Profile }) {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [reference, setReference] = useState("");
-  const [step, setStep] = useState<"form" | "confirm" | "done">("form");
+  const [step, setStep] = useState<"form" | "confirm" | "otp" | "done">("form");
 
   async function search() {
     if (term.trim().length < 3) {
@@ -56,7 +57,10 @@ export function SendMoney({ profile }: { profile: Profile }) {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      toast.error(error.message);
+      setStep("confirm");
+    },
   });
 
   function reset() {
@@ -111,13 +115,28 @@ export function SendMoney({ profile }: { profile: Profile }) {
           </Button>
           <Button
             className="flex-1"
-            disabled={transfer.isPending}
-            onClick={() => transfer.mutate()}
+            onClick={() => setStep("otp")}
           >
-            {transfer.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm & Send"}
+            Continue to OTP
           </Button>
         </div>
       </div>
+    );
+  }
+
+  if (step === "otp" && recipient) {
+    return (
+      <OtpVerification
+        userId={profile.id}
+        userEmail={profile.email || ""}
+        transactionSummary={{
+          recipient: recipient.full_name,
+          amount: money(Number(amount), profile.currency),
+          description: description || undefined,
+        }}
+        onVerified={() => transfer.mutate()}
+        onCancel={() => setStep("confirm")}
+      />
     );
   }
 

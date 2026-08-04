@@ -3,33 +3,41 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
-let cachedFetch: ((req: Request, env: unknown, ctx: unknown) => Promise<Response>) | null = null;
+type ServerEntry = {
+  fetch: (req: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
+};
 
-async function getFetch() {
-  if (cachedFetch) return cachedFetch;
-  const mod = await import("@tanstack/react-start/server");
-  cachedFetch = mod.createStartHandler(mod.defaultStreamHandler) as (
-    req: Request,
-    env: unknown,
-    ctx: unknown,
-  ) => Promise<Response>;
-  return cachedFetch;
+let serverEntryPromise: Promise<ServerEntry> | undefined;
+
+async function getServerEntry(): Promise<ServerEntry> {
+  if (!serverEntryPromise) {
+    serverEntryPromise = import("@tanstack/react-start/server-entry").then(
+      (m) => ((m as any).default ?? m) as ServerEntry,
+    );
+  }
+  return serverEntryPromise;
 }
 
 // @ts-ignore
 if (import.meta.hot) {
   // @ts-ignore
   import.meta.hot.accept(() => {
-    cachedFetch = null;
+    serverEntryPromise = undefined;
   });
 }
 
-// h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
+function isH3SwallowedErrorBody(body: string): boolean {
+  try {
+    const p = JSON.parse(body) as { unhandled?: unknown; message?: unknown };
+    return p.unhandled === true && p.message === "HTTPError";
+  } catch {
+    return false;
+  }
+}
+
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) return response;
+  if (!(response.headers.get("content-type") ?? "").includes("application/json")) return response;
 
   const body = await response.clone().text();
   if (!isH3SwallowedErrorBody(body)) return response;
@@ -41,20 +49,11 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
-function isH3SwallowedErrorBody(body: string): boolean {
-  try {
-    const payload = JSON.parse(body) as { unhandled?: unknown; message?: unknown };
-    return payload.unhandled === true && payload.message === "HTTPError";
-  } catch {
-    return false;
-  }
-}
-
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const fn = await getFetch();
-      const response = await fn(request, env, ctx);
+      const handler = await getServerEntry();
+      const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);

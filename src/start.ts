@@ -21,11 +21,18 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 // Start installs this automatically when src/start.ts is absent; defining the
 // file opts out, so re-add it explicitly to keep server functions protected
 // from cross-site requests.
-const csrfMiddleware = createCsrfMiddleware({
-  filter: (ctx) => ctx.handlerType === "serverFn",
+//
+// NOTE: createCsrfMiddleware is createIsomorphicFn().server(impl) — it must
+// NOT be called at module top-level because Vercel's SSR bundler may resolve
+// the wrong export condition before the TanStack compiler rewrites the
+// isomorphic fn stubs. Deferring the call inside createStart's lazy callback
+// ensures it runs after all modules are initialised with the correct impl.
+export const startInstance = createStart(() => {
+  const csrfMiddleware = createCsrfMiddleware({
+    filter: (ctx) => ctx.handlerType === "serverFn",
+  });
+  return {
+    functionMiddleware: [attachSupabaseAuth],
+    requestMiddleware: [errorMiddleware, csrfMiddleware],
+  };
 });
-
-export const startInstance = createStart(() => ({
-  functionMiddleware: [attachSupabaseAuth],
-  requestMiddleware: [errorMiddleware, csrfMiddleware],
-}));

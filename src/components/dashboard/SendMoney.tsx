@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { money } from "@/lib/bank";
 import type { Profile } from "@/lib/bank";
 import { OtpVerification } from "@/components/dashboard/OtpVerification";
+import { PaymentPin } from "@/components/dashboard/PaymentPin";
 
 type Recipient = { id: string; full_name: string; username: string | null; account_number: string };
 
@@ -23,7 +24,7 @@ export function SendMoney({ profile }: { profile: Profile }) {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [reference, setReference] = useState("");
-  const [step, setStep] = useState<"form" | "confirm" | "otp" | "done">("form");
+  const [step, setStep] = useState<"form" | "confirm" | "otp" | "pin" | "done">("form");
 
   async function search() {
     if (term.trim().length < 3) {
@@ -42,12 +43,13 @@ export function SendMoney({ profile }: { profile: Profile }) {
   }
 
   const transfer = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (pin: string) => {
       const { error } = await supabase.rpc("send_money", {
         _recipient_account: recipient!.account_number,
         _amount: Number(amount),
         _description: description || undefined,
         _reference: reference || undefined,
+        _pin: pin,
       });
       if (error) throw error;
     },
@@ -59,7 +61,7 @@ export function SendMoney({ profile }: { profile: Profile }) {
     },
     onError: (error: Error) => {
       toast.error(error.message);
-      setStep("confirm");
+      setStep("pin");
     },
   });
 
@@ -134,7 +136,17 @@ export function SendMoney({ profile }: { profile: Profile }) {
           amount: money(Number(amount), profile.currency),
           description: description || undefined,
         }}
-        onVerified={() => transfer.mutate()}
+        onVerified={() => setStep("pin")}
+        onCancel={() => setStep("confirm")}
+      />
+    );
+  }
+
+  if (step === "pin" && recipient) {
+    return (
+      <PaymentPin
+        summary={`${money(Number(amount), profile.currency)} to ${recipient.full_name}`}
+        onVerified={(pin) => transfer.mutate(pin)}
         onCancel={() => setStep("confirm")}
       />
     );

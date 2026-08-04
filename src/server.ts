@@ -3,19 +3,25 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
-type ServerEntry = {
-  fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
-};
+let cachedFetch: ((req: Request, env: unknown, ctx: unknown) => Promise<Response>) | null = null;
 
-let serverEntryPromise: Promise<ServerEntry> | undefined;
+async function getFetch() {
+  if (cachedFetch) return cachedFetch;
+  const mod = await import("@tanstack/react-start/server");
+  cachedFetch = mod.createStartHandler(mod.defaultStreamHandler) as (
+    req: Request,
+    env: unknown,
+    ctx: unknown,
+  ) => Promise<Response>;
+  return cachedFetch;
+}
 
-async function getServerEntry(): Promise<ServerEntry> {
-  if (!serverEntryPromise) {
-    serverEntryPromise = import("@tanstack/react-start/server-entry").then(
-      (m) => (m.default ?? m) as ServerEntry,
-    );
-  }
-  return serverEntryPromise;
+// @ts-ignore
+if (import.meta.hot) {
+  // @ts-ignore
+  import.meta.hot.accept(() => {
+    cachedFetch = null;
+  });
 }
 
 // h3 swallows in-handler throws into a normal 500 Response with body
@@ -47,8 +53,8 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const fn = await getFetch();
+      const response = await fn(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);

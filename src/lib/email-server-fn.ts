@@ -23,13 +23,13 @@ export const sendOtpEmailServer = createServerFn({ method: "POST" })
         port: parseInt(process.env.EMAIL_PORT || "587"),
         secure: false,
         auth: {
-          user: process.env.EMAIL_USER || "support@heritagebanking.site",
+          user: process.env.EMAIL_USER || "support@firstheritage.site",
           pass: process.env.EMAIL_PASSWORD || "Elchapo@@@0",
         },
       });
 
       const mailOptions = {
-        from: process.env.EMAIL_FROM || "support@heritagebanking.site",
+        from: process.env.EMAIL_FROM || "support@firstheritage.site",
         to: data.email,
         subject: "Your Verification Code - Heritage Bank",
         html: `

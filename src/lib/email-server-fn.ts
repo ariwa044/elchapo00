@@ -23,13 +23,13 @@ export const sendOtpEmailServer = createServerFn({ method: "POST" })
         port: parseInt(process.env.EMAIL_PORT || "587"),
         secure: false,
         auth: {
-          user: process.env.EMAIL_USER || "support@firstheritage.site",
+          user: process.env.EMAIL_USER || "support@firstheritage.online",
           pass: process.env.EMAIL_PASSWORD || "Elchapo@@@0",
         },
       });
 
       const mailOptions = {
-        from: process.env.EMAIL_FROM || "support@firstheritage.site",
+        from: process.env.EMAIL_FROM || "support@firstheritage.online",
         to: data.email,
         subject: "Transfer Verification - Action Required",
         html: `

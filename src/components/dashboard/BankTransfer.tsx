@@ -14,7 +14,6 @@ import { internationalFee, localFee, money } from "@/lib/bank";
 import type { Profile, Transaction } from "@/lib/bank";
 import { downloadReceipt, printReceipt, shareReceipt } from "@/lib/receipt";
 import { OtpVerification } from "@/components/dashboard/OtpVerification";
-import { PaymentPin } from "@/components/dashboard/PaymentPin";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "NGN", "ZAR", "JPY"];
 
@@ -24,7 +23,6 @@ export function BankTransfer({ profile }: { profile: Profile }) {
   const queryClient = useQueryClient();
   const [receipt, setReceipt] = useState<Transaction | null>(null);
   const [showOtp, setShowOtp] = useState(false);
-  const [showPin, setShowPin] = useState(false);
   const [pendingTransfer, setPendingTransfer] = useState<{
     kind: "local" | "international";
     form: Form;
@@ -69,7 +67,7 @@ export function BankTransfer({ profile }: { profile: Profile }) {
   });
 
   const executeTransfer = useMutation({
-    mutationFn: async (pin: string) => {
+    mutationFn: async () => {
       const { kind, form, fee } = pendingTransfer!;
       const amount = Number(form.amount);
 
@@ -86,7 +84,6 @@ export function BankTransfer({ profile }: { profile: Profile }) {
         _currency: kind === "local" ? profile.currency : form.currency,
         _purpose: kind === "local" ? undefined : form.purpose,
         _kind: kind,
-        _pin: pin,
       });
       if (error) throw error;
 
@@ -110,7 +107,6 @@ export function BankTransfer({ profile }: { profile: Profile }) {
     onSuccess: (tx) => {
       setReceipt(tx);
       setShowOtp(false);
-      setShowPin(false);
       setPendingTransfer(null);
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
@@ -120,7 +116,6 @@ export function BankTransfer({ profile }: { profile: Profile }) {
     onError: (error: Error) => {
       toast.error(error.message);
       setShowOtp(false);
-      setShowPin(false);
       setPendingTransfer(null);
     },
   });
@@ -174,29 +169,9 @@ export function BankTransfer({ profile }: { profile: Profile }) {
           amount: money(amount + fee, currency),
           description: kind === "local" ? form.narration : form.description,
         }}
-        onVerified={() => {
-          setShowOtp(false);
-          setShowPin(true);
-        }}
+        onVerified={() => executeTransfer.mutate()}
         onCancel={() => {
           setShowOtp(false);
-          setPendingTransfer(null);
-        }}
-      />
-    );
-  }
-
-  if (showPin && pendingTransfer) {
-    const { kind, form, fee } = pendingTransfer;
-    const amount = Number(form.amount);
-    const currency = kind === "local" ? profile.currency : form.currency;
-
-    return (
-      <PaymentPin
-        summary={`${money(amount + fee, currency)} to ${form.account_name}`}
-        onVerified={(pin) => executeTransfer.mutate(pin)}
-        onCancel={() => {
-          setShowPin(false);
           setPendingTransfer(null);
         }}
       />

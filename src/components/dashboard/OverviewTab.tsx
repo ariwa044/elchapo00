@@ -31,6 +31,7 @@ import {
 import { CATEGORY_LABELS, formatDate, formatTime, money } from "@/lib/bank";
 import type { Card, Profile, Transaction } from "@/lib/bank";
 import { VisaCard } from "@/components/dashboard/CardsPanel";
+import { PhotoUpload } from "@/components/dashboard/PhotoUpload";
 
 export function OverviewTab({
   profile,

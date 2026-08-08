@@ -299,6 +299,42 @@ export type Database = {
         }
         Relationships: []
       }
+      transfer_otps: {
+        Row: {
+          amount: number | null
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          purpose: string
+          updated_at: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          purpose?: string
+          updated_at?: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          purpose?: string
+          updated_at?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -355,10 +391,15 @@ export type Database = {
           _iban?: string
           _kind?: string
           _narration?: string
+          _otp?: string
           _purpose?: string
           _swift?: string
         }
         Returns: Json
+      }
+      consume_transfer_otp: {
+        Args: { _amount: number; _code: string }
+        Returns: undefined
       }
       find_recipient: {
         Args: { _query: string }
@@ -376,10 +417,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      request_transfer_otp: {
+        Args: { _amount?: number; _purpose?: string }
+        Returns: Json
+      }
       send_money: {
         Args: {
           _amount: number
           _description?: string
+          _otp?: string
           _recipient_account: string
           _reference?: string
         }

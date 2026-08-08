@@ -42,8 +42,10 @@ export function BankTransfer({ profile }: { profile: Profile }) {
   });
   const [saveBeneficiary, setSaveBeneficiary] = useState(false);
 
+  const [otpKind, setOtpKind] = useState<"local" | "international" | null>(null);
+
   const submit = useMutation({
-    mutationFn: async (kind: "local" | "international") => {
+    mutationFn: async ({ kind, otp }: { kind: "local" | "international"; otp: string }) => {
       const form = kind === "local" ? local : intl;
       const amount = Number(form.amount);
       if (!amount || amount <= 0) throw new Error("Enter a valid amount");
@@ -64,6 +66,7 @@ export function BankTransfer({ profile }: { profile: Profile }) {
         _currency: kind === "local" ? profile.currency : form.currency,
         _purpose: kind === "local" ? undefined : form.purpose,
         _kind: kind,
+        _otp: otp,
       });
       if (error) throw error;
 

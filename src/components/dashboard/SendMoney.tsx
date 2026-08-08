@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { money } from "@/lib/bank";
 import type { Profile } from "@/lib/bank";
+import { OtpDialog } from "@/components/dashboard/OtpDialog";
 
 type Recipient = { id: string; full_name: string; username: string | null; account_number: string };
 

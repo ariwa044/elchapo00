@@ -31,6 +31,7 @@ import {
 import { CATEGORY_LABELS, formatDate, formatTime, money } from "@/lib/bank";
 import type { Card, Profile, Transaction } from "@/lib/bank";
 import { VisaCard } from "@/components/dashboard/CardsPanel";
+import { PhotoUpload } from "@/components/dashboard/PhotoUpload";
 
 export function OverviewTab({
   profile,
@@ -312,6 +313,11 @@ function EditProfileDialog({ profile }: { profile: Profile }) {
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <PhotoUpload
+            userId={profile.id}
+            value={form.photo_url}
+            onChange={(url) => setForm((prev) => ({ ...prev, photo_url: url }))}
+          />
           {(
             [
               ["full_name", "Full name"],
@@ -321,7 +327,6 @@ function EditProfileDialog({ profile }: { profile: Profile }) {
               ["city", "City"],
               ["house_address", "Residential address"],
               ["zip_code", "Zip code"],
-              ["photo_url", "Photo URL"],
               ["currency", "Preferred currency"],
             ] as const
           ).map(([key, label]) => (

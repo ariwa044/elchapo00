@@ -116,11 +116,20 @@ export function SendMoney({ profile }: { profile: Profile }) {
           <Button
             className="flex-1"
             disabled={transfer.isPending}
-            onClick={() => transfer.mutate()}
+            onClick={() => setOtpOpen(true)}
           >
             {transfer.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm & Send"}
           </Button>
         </div>
+
+        <OtpDialog
+          open={otpOpen}
+          amount={Number(amount)}
+          purpose="internal_transfer"
+          verifying={transfer.isPending}
+          onCancel={() => setOtpOpen(false)}
+          onVerify={(code) => transfer.mutate(code)}
+        />
       </div>
     );
   }

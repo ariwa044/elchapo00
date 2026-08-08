@@ -43,16 +43,18 @@ export function SendMoney({ profile }: { profile: Profile }) {
   }
 
   const transfer = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (otp: string) => {
       const { error } = await supabase.rpc("send_money", {
         _recipient_account: recipient!.account_number,
         _amount: Number(amount),
         _description: description || undefined,
         _reference: reference || undefined,
+        _otp: otp,
       });
       if (error) throw error;
     },
     onSuccess: () => {
+      setOtpOpen(false);
       setStep("done");
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });

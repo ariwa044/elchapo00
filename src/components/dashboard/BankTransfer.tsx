@@ -89,6 +89,7 @@ export function BankTransfer({ profile }: { profile: Profile }) {
       return tx as Transaction;
     },
     onSuccess: (tx) => {
+      setOtpKind(null);
       setReceipt(tx);
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });

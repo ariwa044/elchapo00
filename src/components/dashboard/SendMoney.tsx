@@ -24,6 +24,7 @@ export function SendMoney({ profile }: { profile: Profile }) {
   const [description, setDescription] = useState("");
   const [reference, setReference] = useState("");
   const [step, setStep] = useState<"form" | "confirm" | "done">("form");
+  const [otpOpen, setOtpOpen] = useState(false);
 
   async function search() {
     if (term.trim().length < 3) {

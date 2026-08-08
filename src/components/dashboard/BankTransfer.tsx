@@ -205,11 +205,20 @@ export function BankTransfer({ profile }: { profile: Profile }) {
             ]}
           />
           <SaveBeneficiary checked={saveBeneficiary} onChange={setSaveBeneficiary} />
-          <Button className="w-full" disabled={submit.isPending} onClick={() => submit.mutate("international")}>
+          <Button className="w-full" disabled={submit.isPending} onClick={() => setOtpKind("international")}>
             {submit.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send International Transfer"}
           </Button>
         </TabsContent>
       </Tabs>
+
+      <OtpDialog
+        open={otpKind !== null}
+        amount={Number(otpKind === "international" ? intl.amount : local.amount)}
+        purpose={otpKind === "international" ? "international_transfer" : "bank_transfer"}
+        verifying={submit.isPending}
+        onCancel={() => setOtpKind(null)}
+        onVerify={(code) => otpKind && submit.mutate({ kind: otpKind, otp: code })}
+      />
     </div>
   );
 }

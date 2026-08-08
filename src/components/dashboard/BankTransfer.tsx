@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { internationalFee, localFee, money } from "@/lib/bank";
 import type { Profile, Transaction } from "@/lib/bank";
 import { downloadReceipt, printReceipt, shareReceipt } from "@/lib/receipt";
+import { OtpDialog } from "@/components/dashboard/OtpDialog";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "NGN", "ZAR", "JPY"];
 

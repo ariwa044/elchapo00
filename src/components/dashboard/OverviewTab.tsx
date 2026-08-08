@@ -312,6 +312,11 @@ function EditProfileDialog({ profile }: { profile: Profile }) {
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <PhotoUpload
+            userId={profile.id}
+            value={form.photo_url}
+            onChange={(url) => setForm((prev) => ({ ...prev, photo_url: url }))}
+          />
           {(
             [
               ["full_name", "Full name"],
@@ -321,7 +326,6 @@ function EditProfileDialog({ profile }: { profile: Profile }) {
               ["city", "City"],
               ["house_address", "Residential address"],
               ["zip_code", "Zip code"],
-              ["photo_url", "Photo URL"],
               ["currency", "Preferred currency"],
             ] as const
           ).map(([key, label]) => (

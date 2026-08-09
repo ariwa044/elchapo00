@@ -42,8 +42,9 @@ export function OtpDialog({ open, verifying, onCancel, onVerify }: Props) {
         </DialogHeader>
 
         <div className="space-y-2">
-          <Label>Transfer PIN</Label>
+          <Label htmlFor="transfer-pin">Transfer PIN</Label>
           <Input
+            id="transfer-pin"
             inputMode="numeric"
             maxLength={6}
             autoFocus

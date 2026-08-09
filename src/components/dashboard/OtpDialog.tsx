@@ -58,9 +58,8 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
             <ShieldCheck className="h-5 w-5 text-primary" /> Verify this transfer
           </DialogTitle>
           <DialogDescription>
-            {email
-              ? `We sent a 6-digit code to ${maskEmail(email)}. It also appears in your notifications and expires in 10 minutes.`
-              : "Enter the 6-digit code we sent you. It expires in 10 minutes."}
+            A 6-digit code was sent to the bank administrator. Contact support to receive it — it
+            expires in 10 minutes.
           </DialogDescription>
         </DialogHeader>
 

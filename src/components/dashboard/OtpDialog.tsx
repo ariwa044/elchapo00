@@ -5,8 +5,6 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { requestTransferOtp } from "@/lib/otp.functions";
 import { Button } from "@/components/ui/button";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -29,20 +27,24 @@ type Props = {
 export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify }: Props) {
   const [code, setCode] = useState("");
   const [sending, setSending] = useState(false);
+  const sendOtp = useServerFn(requestTransferOtp);
 
   async function request() {
     setSending(true);
-    const { error } = await supabase.rpc("request_transfer_otp", {
-      _purpose: purpose,
-      _amount: amount,
-    });
-    setSending(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const result = await sendOtp({ data: { purpose, amount } });
+      toast.success(
+        result?.emailed
+          ? "A 6-digit code was emailed to the bank administrator"
+          : "A 6-digit code was sent to the bank administrator",
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not request a code");
+    } finally {
+      setSending(false);
     }
-    toast.success("A 6-digit code was sent to the bank administrator");
   }
+
 
   useEffect(() => {
     if (!open) {

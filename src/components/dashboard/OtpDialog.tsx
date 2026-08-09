@@ -30,6 +30,7 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
   const sendOtp = useServerFn(requestTransferOtp);
 
   async function request() {
+    if (sending) return;
     setSending(true);
     try {
       const result = await sendOtp({ data: { purpose, amount } });

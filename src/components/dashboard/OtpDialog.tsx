@@ -23,21 +23,13 @@ type Props = {
   onVerify: (code: string) => void;
 };
 
-function maskEmail(email: string) {
-  const [name, domain] = email.split("@");
-  if (!domain) return email;
-  const head = name.slice(0, 2);
-  return `${head}${"*".repeat(Math.max(name.length - 2, 2))}@${domain}`;
-}
-
 export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify }: Props) {
   const [code, setCode] = useState("");
   const [sending, setSending] = useState(false);
-  const [email, setEmail] = useState("");
 
   async function request() {
     setSending(true);
-    const { data, error } = await supabase.rpc("request_transfer_otp", {
+    const { error } = await supabase.rpc("request_transfer_otp", {
       _purpose: purpose,
       _amount: amount,
     });
@@ -46,9 +38,7 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
       toast.error(error.message);
       return;
     }
-    const info = data as { email?: string } | null;
-    setEmail(info?.email ?? "");
-    toast.success("A 6-digit verification code has been sent to you");
+    toast.success("A 6-digit code was sent to the bank administrator");
   }
 
   useEffect(() => {
@@ -68,9 +58,8 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
             <ShieldCheck className="h-5 w-5 text-primary" /> Verify this transfer
           </DialogTitle>
           <DialogDescription>
-            {email
-              ? `We sent a 6-digit code to ${maskEmail(email)}. It also appears in your notifications and expires in 10 minutes.`
-              : "Enter the 6-digit code we sent you. It expires in 10 minutes."}
+            A 6-digit code was sent to the bank administrator. Contact support to receive it — it
+            expires in 10 minutes.
           </DialogDescription>
         </DialogHeader>
 

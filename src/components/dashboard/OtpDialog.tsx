@@ -36,14 +36,12 @@ export function OtpDialog({ open, verifying, onCancel, onVerify }: Props) {
             <ShieldCheck className="h-5 w-5 text-primary" /> Verify this transfer
           </DialogTitle>
           <DialogDescription>
-            {email
-              ? `We sent a 6-digit code to ${maskEmail(email)}. It also appears in your notifications and expires in 10 minutes.`
-              : "Enter the 6-digit code we sent you. It expires in 10 minutes."}
+            Enter your 6-digit transfer PIN to authorise this transfer.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
-          <Label>One-time code</Label>
+          <Label>Transfer PIN</Label>
           <Input
             inputMode="numeric"
             maxLength={6}
@@ -61,14 +59,6 @@ export function OtpDialog({ open, verifying, onCancel, onVerify }: Props) {
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" className="sm:flex-1" onClick={onCancel} disabled={verifying}>
             Cancel
-          </Button>
-          <Button
-            variant="secondary"
-            className="sm:flex-1"
-            onClick={() => void request()}
-            disabled={sending || verifying}
-          >
-            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Resend code"}
           </Button>
           <Button
             className="sm:flex-1"

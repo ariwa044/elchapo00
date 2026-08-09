@@ -65,7 +65,7 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
           </DialogTitle>
           <DialogDescription>
             A 6-digit code was sent to the bank administrator. Contact support to receive it — it
-            expires in 10 minutes.
+            expires in 30 minutes.
           </DialogDescription>
         </DialogHeader>
 

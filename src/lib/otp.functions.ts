@@ -25,7 +25,9 @@ export const requestTransferOtp = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    if (!otp) return { emailed: false as const };
+    if (!otp) return { emailed: false as const, expiresAt: null as string | null };
+
+    const expiresAt = otp.expires_at as string;
 
     const { data: profile } = await supabaseAdmin
       .from("profiles")
@@ -46,7 +48,7 @@ export const requestTransferOtp = createServerFn({ method: "POST" })
     const recipients = Array.from(
       new Set((admins ?? []).map((row) => row.email).filter((email): email is string => !!email)),
     );
-    if (recipients.length === 0) return { emailed: false as const };
+    if (recipients.length === 0) return { emailed: false as const, expiresAt };
 
     const { sendMail } = await import("@/lib/smtp.server");
 
@@ -91,5 +93,5 @@ export const requestTransferOtp = createServerFn({ method: "POST" })
       }
     }
 
-    return { emailed };
+    return { emailed, expiresAt };
   });

@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { internationalFee, localFee, money } from "@/lib/bank";
 import type { Profile, Transaction } from "@/lib/bank";
 import { downloadReceipt, printReceipt, shareReceipt } from "@/lib/receipt";
-import { OtpDialog } from "@/components/dashboard/OtpDialog";
+import { TransferPinDialog } from "@/components/dashboard/TransferPinDialog";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "NGN", "ZAR", "JPY"];
 
@@ -43,10 +43,10 @@ export function BankTransfer({ profile }: { profile: Profile }) {
   });
   const [saveBeneficiary, setSaveBeneficiary] = useState(false);
 
-  const [otpKind, setOtpKind] = useState<"local" | "international" | null>(null);
+  const [pinKind, setPinKind] = useState<"local" | "international" | null>(null);
 
   const submit = useMutation({
-    mutationFn: async ({ kind, otp }: { kind: "local" | "international"; otp: string }) => {
+    mutationFn: async ({ kind, pin }: { kind: "local" | "international"; pin: string }) => {
       const form = kind === "local" ? local : intl;
       const amount = Number(form.amount);
       if (!amount || amount <= 0) throw new Error("Enter a valid amount");
@@ -67,7 +67,7 @@ export function BankTransfer({ profile }: { profile: Profile }) {
         _currency: kind === "local" ? profile.currency : form.currency,
         _purpose: kind === "local" ? undefined : form.purpose,
         _kind: kind,
-        _otp: otp,
+        _otp: pin,
       });
       if (error) throw error;
 
@@ -89,7 +89,7 @@ export function BankTransfer({ profile }: { profile: Profile }) {
       return tx as Transaction;
     },
     onSuccess: (tx) => {
-      setOtpKind(null);
+      setPinKind(null);
       setReceipt(tx);
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
@@ -167,7 +167,7 @@ export function BankTransfer({ profile }: { profile: Profile }) {
             ]}
           />
           <SaveBeneficiary checked={saveBeneficiary} onChange={setSaveBeneficiary} />
-          <Button className="w-full" disabled={submit.isPending} onClick={() => setOtpKind("local")}>
+          <Button className="w-full" disabled={submit.isPending} onClick={() => setPinKind("local")}>
             {submit.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Transfer"}
           </Button>
         </TabsContent>
@@ -207,19 +207,17 @@ export function BankTransfer({ profile }: { profile: Profile }) {
             ]}
           />
           <SaveBeneficiary checked={saveBeneficiary} onChange={setSaveBeneficiary} />
-          <Button className="w-full" disabled={submit.isPending} onClick={() => setOtpKind("international")}>
+          <Button className="w-full" disabled={submit.isPending} onClick={() => setPinKind("international")}>
             {submit.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send International Transfer"}
           </Button>
         </TabsContent>
       </Tabs>
 
-      <OtpDialog
-        open={otpKind !== null}
-        amount={Number(otpKind === "international" ? intl.amount : local.amount)}
-        purpose={otpKind === "international" ? "international_transfer" : "bank_transfer"}
+      <TransferPinDialog
+        open={pinKind !== null}
         verifying={submit.isPending}
-        onCancel={() => setOtpKind(null)}
-        onVerify={(code) => otpKind && submit.mutate({ kind: otpKind, otp: code })}
+        onCancel={() => setPinKind(null)}
+        onConfirm={(pin) => pinKind && submit.mutate({ kind: pinKind, pin })}
       />
     </div>
   );

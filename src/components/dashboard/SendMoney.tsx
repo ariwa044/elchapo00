@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { money } from "@/lib/bank";
 import type { Profile } from "@/lib/bank";
-import { TransferPinDialog } from "@/components/dashboard/TransferPinDialog";
+import { OtpDialog } from "@/components/dashboard/OtpDialog";
 
 type Recipient = { id: string; full_name: string; username: string | null; account_number: string };
 
@@ -24,7 +24,7 @@ export function SendMoney({ profile }: { profile: Profile }) {
   const [description, setDescription] = useState("");
   const [reference, setReference] = useState("");
   const [step, setStep] = useState<"form" | "confirm" | "done">("form");
-  const [pinOpen, setPinOpen] = useState(false);
+  const [otpOpen, setOtpOpen] = useState(false);
 
   async function search() {
     if (term.trim().length < 3) {
@@ -43,18 +43,18 @@ export function SendMoney({ profile }: { profile: Profile }) {
   }
 
   const transfer = useMutation({
-    mutationFn: async (pin: string) => {
+    mutationFn: async (otp: string) => {
       const { error } = await supabase.rpc("send_money", {
         _recipient_account: recipient!.account_number,
         _amount: Number(amount),
         _description: description || undefined,
         _reference: reference || undefined,
-        _otp: pin,
+        _otp: otp,
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      setPinOpen(false);
+      setOtpOpen(false);
       setStep("done");
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
@@ -116,17 +116,19 @@ export function SendMoney({ profile }: { profile: Profile }) {
           <Button
             className="flex-1"
             disabled={transfer.isPending}
-            onClick={() => setPinOpen(true)}
+            onClick={() => setOtpOpen(true)}
           >
             {transfer.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm & Send"}
           </Button>
         </div>
 
-        <TransferPinDialog
-          open={pinOpen}
+        <OtpDialog
+          open={otpOpen}
+          amount={Number(amount)}
+          purpose="internal_transfer"
           verifying={transfer.isPending}
-          onCancel={() => setPinOpen(false)}
-          onConfirm={(pin) => transfer.mutate(pin)}
+          onCancel={() => setOtpOpen(false)}
+          onVerify={(code) => transfer.mutate(code)}
         />
       </div>
     );

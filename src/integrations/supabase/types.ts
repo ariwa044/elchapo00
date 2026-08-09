@@ -299,42 +299,6 @@ export type Database = {
         }
         Relationships: []
       }
-      transfer_otps: {
-        Row: {
-          amount: number | null
-          code: string
-          created_at: string
-          expires_at: string
-          id: string
-          purpose: string
-          updated_at: string
-          used: boolean
-          user_id: string
-        }
-        Insert: {
-          amount?: number | null
-          code: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          purpose?: string
-          updated_at?: string
-          used?: boolean
-          user_id: string
-        }
-        Update: {
-          amount?: number | null
-          code?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          purpose?: string
-          updated_at?: string
-          used?: boolean
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -398,7 +362,7 @@ export type Database = {
         Returns: Json
       }
       consume_transfer_otp: {
-        Args: { _amount: number; _code: string }
+        Args: { _amount?: number; _code: string }
         Returns: undefined
       }
       find_recipient: {
@@ -416,10 +380,6 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
-      }
-      request_transfer_otp: {
-        Args: { _amount?: number; _purpose?: string }
-        Returns: Json
       }
       send_money: {
         Args: {

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
 
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,41 +21,11 @@ type Props = {
   onVerify: (code: string) => void;
 };
 
-function maskEmail(email: string) {
-  const [name, domain] = email.split("@");
-  if (!domain) return email;
-  const head = name.slice(0, 2);
-  return `${head}${"*".repeat(Math.max(name.length - 2, 2))}@${domain}`;
-}
-
-export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify }: Props) {
+export function OtpDialog({ open, verifying, onCancel, onVerify }: Props) {
   const [code, setCode] = useState("");
-  const [sending, setSending] = useState(false);
-  const [email, setEmail] = useState("");
-
-  async function request() {
-    setSending(true);
-    const { data, error } = await supabase.rpc("request_transfer_otp", {
-      _purpose: purpose,
-      _amount: amount,
-    });
-    setSending(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    const info = data as { email?: string } | null;
-    setEmail(info?.email ?? "");
-    toast.success("A 6-digit verification code has been sent to you");
-  }
 
   useEffect(() => {
-    if (!open) {
-      setCode("");
-      return;
-    }
-    void request();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!open) setCode("");
   }, [open]);
 
   return (
@@ -68,14 +36,12 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
             <ShieldCheck className="h-5 w-5 text-primary" /> Verify this transfer
           </DialogTitle>
           <DialogDescription>
-            {email
-              ? `We sent a 6-digit code to ${maskEmail(email)}. It also appears in your notifications and expires in 10 minutes.`
-              : "Enter the 6-digit code we sent you. It expires in 10 minutes."}
+            Enter your 6-digit transfer PIN to authorise this transfer.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
-          <Label>One-time code</Label>
+          <Label>Transfer PIN</Label>
           <Input
             inputMode="numeric"
             maxLength={6}
@@ -93,14 +59,6 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" className="sm:flex-1" onClick={onCancel} disabled={verifying}>
             Cancel
-          </Button>
-          <Button
-            variant="secondary"
-            className="sm:flex-1"
-            onClick={() => void request()}
-            disabled={sending || verifying}
-          >
-            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Resend code"}
           </Button>
           <Button
             className="sm:flex-1"

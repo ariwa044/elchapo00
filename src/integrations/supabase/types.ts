@@ -398,7 +398,7 @@ export type Database = {
         Returns: Json
       }
       consume_transfer_otp: {
-        Args: { _amount: number; _code: string }
+        Args: { _amount?: number; _code: string }
         Returns: undefined
       }
       find_recipient: {

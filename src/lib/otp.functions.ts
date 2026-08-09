@@ -25,7 +25,9 @@ export const requestTransferOtp = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    if (!otp) return { emailed: false as const };
+    if (!otp) return { emailed: false as const, expiresAt: null as string | null };
+
+    const expiresAt = otp.expires_at as string;
 
     const { data: profile } = await supabaseAdmin
       .from("profiles")

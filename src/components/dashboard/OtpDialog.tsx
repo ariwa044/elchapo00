@@ -120,7 +120,7 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
           </Button>
           <Button
             className="sm:flex-1"
-            disabled={code.length !== 6 || verifying}
+            disabled={code.length !== 6 || verifying || expired}
             onClick={() => onVerify(code)}
           >
             {verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & Send"}

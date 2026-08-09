@@ -33,10 +33,11 @@ export function OtpDialog({ open, verifying, onCancel, onVerify }: Props) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" /> Verify this transfer
+            <ShieldCheck className="h-5 w-5 text-primary" /> Transfer PIN required
           </DialogTitle>
           <DialogDescription>
-            Enter your 6-digit transfer PIN to authorise this transfer.
+            No email or SMS code is sent. Enter your private 6-digit transfer PIN to authorise
+            this transfer.
           </DialogDescription>
         </DialogHeader>
 

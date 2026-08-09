@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
 
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,41 +21,11 @@ type Props = {
   onVerify: (code: string) => void;
 };
 
-function maskEmail(email: string) {
-  const [name, domain] = email.split("@");
-  if (!domain) return email;
-  const head = name.slice(0, 2);
-  return `${head}${"*".repeat(Math.max(name.length - 2, 2))}@${domain}`;
-}
-
-export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify }: Props) {
+export function OtpDialog({ open, verifying, onCancel, onVerify }: Props) {
   const [code, setCode] = useState("");
-  const [sending, setSending] = useState(false);
-  const [email, setEmail] = useState("");
-
-  async function request() {
-    setSending(true);
-    const { data, error } = await supabase.rpc("request_transfer_otp", {
-      _purpose: purpose,
-      _amount: amount,
-    });
-    setSending(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    const info = data as { email?: string } | null;
-    setEmail(info?.email ?? "");
-    toast.success("A 6-digit verification code has been sent to you");
-  }
 
   useEffect(() => {
-    if (!open) {
-      setCode("");
-      return;
-    }
-    void request();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!open) setCode("");
   }, [open]);
 
   return (

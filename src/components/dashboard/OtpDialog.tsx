@@ -27,13 +27,17 @@ type Props = {
 export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify }: Props) {
   const [code, setCode] = useState("");
   const [sending, setSending] = useState(false);
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const sendOtp = useServerFn(requestTransferOtp);
 
   async function request() {
     if (sending) return;
     setSending(true);
+    setCode("");
     try {
       const result = await sendOtp({ data: { purpose, amount } });
+      setExpiresAt(result?.expiresAt ? new Date(result.expiresAt).getTime() : null);
       toast.success(
         result?.emailed
           ? "A 6-digit code was emailed to the bank administrator"
@@ -46,15 +50,28 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
     }
   }
 
-
   useEffect(() => {
     if (!open) {
       setCode("");
+      setExpiresAt(null);
       return;
     }
     void request();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !expiresAt) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [open, expiresAt]);
+
+  const remaining = expiresAt ? Math.max(0, Math.floor((expiresAt - now) / 1000)) : null;
+  const expired = remaining === 0;
+  const clock =
+    remaining === null
+      ? null
+      : `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`;
 
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onCancel()}>
@@ -64,10 +81,14 @@ export function OtpDialog({ open, amount, purpose, verifying, onCancel, onVerify
             <ShieldCheck className="h-5 w-5 text-primary" /> Verify this transfer
           </DialogTitle>
           <DialogDescription>
-            A 6-digit code was sent to the bank administrator. Contact support to receive it — it
-            expires in 30 minutes.
+            A 6-digit code was sent to the bank administrator. Contact support to receive it.
+            {clock &&
+              (expired
+                ? " This code has expired — tap Resend code."
+                : ` Expires in ${clock}.`)}
           </DialogDescription>
         </DialogHeader>
+
 
         <div className="space-y-2">
           <Label>One-time code</Label>

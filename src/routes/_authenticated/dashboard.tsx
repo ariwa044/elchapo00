@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  Bell,
   Clock,
   CreditCard,
   LayoutGrid,
@@ -15,14 +14,12 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   money,
   useBeneficiaries,
   useCards,
   useIsAdmin,
-  useNotifications,
   useProfile,
   useRealtimeBanking,
   useTransactions,
@@ -33,7 +30,7 @@ import { ReceiveMoney } from "@/components/dashboard/ReceiveMoney";
 import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 import { OverviewTab } from "@/components/dashboard/OverviewTab";
 import { CardsPanel } from "@/components/dashboard/CardsPanel";
-import { Beneficiaries, Faqs, Notifications } from "@/components/dashboard/Extras";
+import { Beneficiaries, Faqs } from "@/components/dashboard/Extras";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -74,7 +71,6 @@ function Dashboard() {
   const { data: transactions = [] } = useTransactions();
   const { data: cards = [] } = useCards();
   const { data: beneficiaries = [] } = useBeneficiaries();
-  const { data: notifications = [] } = useNotifications();
   const { data: isAdmin } = useIsAdmin();
 
   async function handleSignOut() {
@@ -92,8 +88,6 @@ function Dashboard() {
     );
   }
 
-  const unread = notifications.filter((item) => !item.read).length;
-
   return (
     <main className="min-h-screen bg-surface-deep px-4 py-10 sm:px-8">
       <div className="mx-auto max-w-6xl">
@@ -110,10 +104,6 @@ function Dashboard() {
                 </Link>
               </Button>
             )}
-            <Button variant="outline" onClick={() => setTab("extras")}>
-              <Bell className="mr-2 h-4 w-4" />
-              {unread > 0 ? <Badge className="px-1.5">{unread}</Badge> : "Alerts"}
-            </Button>
             <Button variant="outline" onClick={handleSignOut}>
               Sign Out
             </Button>
@@ -207,7 +197,6 @@ function Dashboard() {
           </TabsContent>
 
           <TabsContent value="extras" className="animate-in fade-in mt-6 space-y-6 duration-300">
-            <Notifications notifications={notifications} />
             <Beneficiaries profile={profile} beneficiaries={beneficiaries} />
             <Faqs />
             <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card p-5">
